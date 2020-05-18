@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30011.22
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "odbc-connector", "odbc-connector\odbc-connector.csproj", "{83D67F99-C343-49DA-8D9E-B31261C7C23E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{83D67F99-C343-49DA-8D9E-B31261C7C23E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{83D67F99-C343-49DA-8D9E-B31261C7C23E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{83D67F99-C343-49DA-8D9E-B31261C7C23E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{83D67F99-C343-49DA-8D9E-B31261C7C23E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0BA3842F-3112-4F85-B164-C82957B3F37C}
+	EndGlobalSection
+EndGlobal
