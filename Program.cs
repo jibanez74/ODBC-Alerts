@@ -25,7 +25,7 @@ namespace ODBC_Connector
       int readInterval = Console.ReadLine();
 
       OdbcMonitorOne = new OdbcMonitor(selectedSource, tableName, column, result, readInterval);
-
+      OdbcMonitor.ReadAndEval();
     }
 
     // Get and display app info
