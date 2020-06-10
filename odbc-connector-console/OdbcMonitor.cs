@@ -16,7 +16,7 @@ namespace odbc_connector_console
     private string dsnConnection;
     private string tableName;
     private string colName;
-    private int colNumber;
+    private int colNumber = 0;
     private string result;
 
     // props related to emails
@@ -29,7 +29,7 @@ namespace odbc_connector_console
     private string username = "smtp-username";
     private string password = "smtp-password";
 
-    public OdbcMonitor(string selectedSource, string tableName, string colName, string colNumber, string result)
+    public OdbcMonitor(string selectedSource, string tableName, string colName, string result)
     {
       Console.WriteLine("Running constructor for OdbcMonitor");
       this.dsnConnection = selectedSource;
@@ -38,19 +38,12 @@ namespace odbc_connector_console
       this.result = result;
 
       // init instance of smtpClient
+      smtpClient = new MailKit.Net.Smtp.SmtpClient();
       this.message = new MimeMessage();
       this.message.From.Add(new MailboxAddress(this.messageFrom));
       this.message.To.Add(new MailboxAddress(this.messageTo));
       this.message.Subject = this.subject;
       this.message.Body = new TextPart("plain", "The result does not match the value on the column " + this.colName);
-      try
-      {
-        this.colNumber = int.Parse(colNumber);
-      }
-      catch (Exception error)
-      {
-        Console.WriteLine(error.Message);
-      }
     }
 
     public void ReadAndEval()
@@ -102,7 +95,7 @@ namespace odbc_connector_console
           else
           {
             Console.WriteLine("Values do not match - About to send email alert");
-            smtpClient.Connect(this.smtpUrl, this.smtpPort);
+            smtpClient.Connect(this.smtpUrl, this.smtpPort, true);
 
             // this option is only needed if server requires it
             // the port will also depend on the provider/hosting provider
@@ -110,8 +103,9 @@ namespace odbc_connector_console
 
             smtpClient.Send(this.message);
             smtpClient.Disconnect(true);
+
+            reader.Close();
           }
-          reader.Close();
         }
 
         connection.Close();
