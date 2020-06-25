@@ -1,8 +1,6 @@
 using System;
 using System.Data.Odbc;
 using System.Timers;
-using MailKit;
-using MimeKit;
 
 namespace odbc_connector_console
 {
@@ -10,7 +8,6 @@ namespace odbc_connector_console
   {
     // static props of class
     private static System.Timers.Timer aTimer;
-    private static MailKit.Net.Smtp.SmtpClient smtpClient;
 
     // props for odbc tasks
     private string dsnConnection;
@@ -18,16 +15,8 @@ namespace odbc_connector_console
     private string colName;
     private int colNumber = 0;
     private string result;
-
-    // props related to emails
-    private int smtpPort = 587;
-    private string smtpUrl = "http://smtp-url-here";
-    private MimeMessage message;
-    private string messageFrom = "no-reply@inteldot.com";
-    private string messageTo = "recipient-email@email.com";
-    private string subject = "Warning from ODBC middleware";
-    private string username = "smtp-username";
-    private string password = "smtp-password";
+    private bool wrongValue = false;
+    private AlertMail mailer = new AlertMail();
 
     public OdbcMonitor(string selectedSource, string tableName, string colName, string result)
     {
@@ -36,14 +25,6 @@ namespace odbc_connector_console
       this.tableName = tableName;
       this.colName = colName;
       this.result = result;
-
-      // init instance of smtpClient
-      smtpClient = new MailKit.Net.Smtp.SmtpClient();
-      this.message = new MimeMessage();
-      this.message.From.Add(new MailboxAddress(this.messageFrom));
-      this.message.To.Add(new MailboxAddress(this.messageTo));
-      this.message.Subject = this.subject;
-      this.message.Body = new TextPart("plain", "The result does not match the value on the column " + this.colName);
     }
 
     public void ReadAndEval()
@@ -70,13 +51,9 @@ namespace odbc_connector_console
     {
       Console.WriteLine("The Elapsed event was raised at {0:HH:mm:ss.fff}",
         e.SignalTime);
-      string sqlQuery = "select " + this.colName + " from " + this.tableName + ";";
+      string sqlQuery = "SELECT " + this.colName + " FROM " + this.tableName + " LIMIT 1;";
 
       OdbcConnection connection = new OdbcConnection("DSN=" + this.dsnConnection + ";");
-
-      // vars for cases when multiple columns and rows are being evaluated
-      // bool read;
-      // object[] columnValues = new object[1];
 
       // creates a new odbc command with a query and the connection
       OdbcCommand command = new OdbcCommand(sqlQuery, connection);
@@ -86,28 +63,30 @@ namespace odbc_connector_console
         connection.Open();
         OdbcDataReader reader = command.ExecuteReader();
 
-        while (reader.Read())
+        reader.Read();
+
+        if (this.result == reader.GetString(this.colNumber))
         {
-          if (this.result == reader.GetString(this.colNumber))
+          Console.WriteLine("Values match");
+          this.wrongValue = false;
+          mailer.SetEmailSent(false);
+        }
+        else
+        {
+          if (this.wrongValue && this.mailer.GetEmailSent())
           {
-            Console.WriteLine("Values match");
+            Console.WriteLine("Result and value from column still do not match");
           }
           else
           {
-            Console.WriteLine("Values do not match - About to send email alert");
-            smtpClient.Connect(this.smtpUrl, this.smtpPort, true);
-
-            // this option is only needed if server requires it
-            // the port will also depend on the provider/hosting provider
-            smtpClient.Authenticate(this.username, this.password);
-
-            smtpClient.Send(this.message);
-            smtpClient.Disconnect(true);
-
-            reader.Close();
+            Console.WriteLine("Value from column does not match \n About to send email alert");
+            this.wrongValue = true;
+            mailer.SetEmailSent(true);
+            mailer.SendEmailAlert();
           }
         }
 
+        reader.Close();
         connection.Close();
       }
       catch (Exception error)

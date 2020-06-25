@@ -15,13 +15,12 @@ namespace odbc_connector_console
       Console.WriteLine("Please enter the name of the table");
       string tableName = Console.ReadLine();
 
-      Console.WriteLine("The name of the column to evaluate");
+      Console.WriteLine("Please enter the name of the column you wish to select");
       string columnName = Console.ReadLine();
-
       Console.WriteLine("Enter the result to evaluate");
       string result = Console.ReadLine();
 
-      OdbcMonitor odbcMonitorOne = new OdbcMonitor(selectedSource, tableName, columnName, columnNumber, result);
+      OdbcMonitor odbcMonitorOne = new OdbcMonitor(selectedSource, tableName, columnName, result);
       odbcMonitorOne.ReadAndEval();
     }
 
